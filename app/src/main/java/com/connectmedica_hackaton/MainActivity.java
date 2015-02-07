@@ -208,8 +208,11 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
         textTime.setInAnimation(animIn);
         textTime.setOutAnimation(animOut);
 
-        //        ServerThr.start();
-//        getData();
+        nicotineAmountText.setInAnimation(animIn);
+        nicotineAmountText.setOutAnimation(animOut);
+
+        cigaretsEquivalentText.setInAnimation(animIn);
+        cigaretsEquivalentText.setOutAnimation(animOut);
 
 //        BTServerTask task = new BTServerTask();
 //        task.execute();
