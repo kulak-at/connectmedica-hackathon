@@ -14,10 +14,16 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.connectmedica_hackaton.http.AbstractHttp;
+import com.connectmedica_hackaton.http.HttpMe;
+import com.connectmedica_hackaton.model.User;
+
+import org.json.JSONArray;
+
 import java.util.Calendar;
 
 
-public class MainActivity extends ActionBarActivity
+public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAjaxResult<JSONArray>
 {
     private static final int REQUEST_ENABLE_BT = 42;
     private long startTime = 0;
@@ -55,6 +61,28 @@ public class MainActivity extends ActionBarActivity
                 return false;
             }
         });
+
+        getData();
+    }
+
+    private void getData()
+    {
+        HttpMe ajax = new HttpMe(getApplicationContext());
+        ajax.onResult(this);
+        ajax.run();
+    }
+
+    @Override
+    public void onResult(JSONArray data)
+    {
+        Toast.makeText(this, data.toString(), Toast.LENGTH_LONG).show();
+    }
+
+    @Override
+    public void onError(String message)
+    {
+        Toast.makeText(this, "Error", Toast.LENGTH_LONG).show();
+        Log.e("mazurek", message);
     }
 
     public void startBluetooth(View button)

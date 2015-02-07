@@ -4,14 +4,12 @@ import android.content.Context;
 import android.util.Log;
 import java.util.HashMap;
 import java.util.Map;
-import android.content.Intent;
 
 import com.androidquery.AQuery;
 import com.androidquery.callback.AjaxCallback;
 import com.androidquery.callback.AjaxStatus;
+import com.connectmedica_hackaton.App;
 import com.google.gson.Gson;
-
-import javax.xml.transform.Transformer;
 
 public abstract class AbstractHttp<Type>
 {
@@ -34,10 +32,10 @@ public abstract class AbstractHttp<Type>
 
     AQuery mAq;
     public enum Method {
-        GET, POST, PUT, DELETE;
-    };
+        GET, POST, PUT, DELETE
+    }
 
-    protected String url_sufix;
+    protected String urlSuffix;
     protected boolean requireAuth;
     protected Method requestMethod;
     private Map<String, Object> mValues;
@@ -63,7 +61,7 @@ public abstract class AbstractHttp<Type>
         };
 
         if(requireAuth) {
-            callback.header("Token", "");   // TODO
+            callback.header("Token", App.USER_TOKEN);   // TODO
         }
 
         callback.url(prepareUrl());
@@ -90,7 +88,7 @@ public abstract class AbstractHttp<Type>
                 break;
             case 401:
                 if(requireAuth) {
-                    handleUnauth();
+//                    handleUnauth();
                 }
                 break;
             default:
@@ -101,11 +99,11 @@ public abstract class AbstractHttp<Type>
         }
     }
 
-    private void handleUnauth() {
-        Intent intent = new Intent(EvenUpActivity.CUSTOM_ACTION);
-        intent.setType("content://unauth");
-        EvenApp.getInstance().sendBroadcast(intent);
-    }
+//    private void handleUnauth() {
+//        Intent intent = new Intent(EvenUpActivity.CUSTOM_ACTION);
+//        intent.setType("content://unauth");
+//        EvenApp.getInstance().sendBroadcast(intent);
+//    }
 
     private int getMethod() {
         switch (requestMethod) {
@@ -124,21 +122,20 @@ public abstract class AbstractHttp<Type>
 
     protected String prepareUrl()
     {
-        EvenApp app = EvenApp.getInstance();
+        String url = App.getBaseUrl() + App.getApiVersion() + urlSuffix;
 
-        String url = app.getBaseUrl() + app.getApiVersion() + url_sufix;
-
-        if(requestMethod != Method.GET && requestMethod != Method.DELETE) {
-            return url;
-        }
+            if (requestMethod != Method.GET && requestMethod != Method.DELETE)
+                return url;
 
         String ret = url + "?";
         String separator = "";
-        for(String key : mValues.keySet()) {
-            ret += separator + key + "=" + mValues.get(key);
-            separator = "&";
-        }
-        Log.d("kulak", ret);
+
+            for(String key : mValues.keySet())
+            {
+                ret += separator + key + "=" + mValues.get(key);
+                separator = "&";
+            }
+
         return ret;
     }
 
