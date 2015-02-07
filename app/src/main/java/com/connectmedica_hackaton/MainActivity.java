@@ -13,6 +13,7 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.connectmedica_hackaton.bluetoothConnection.BluetoothServer;
 import com.connectmedica_hackaton.http.AbstractHttp;
 import com.connectmedica_hackaton.http.HttpMe;
 import com.connectmedica_hackaton.model.User;
@@ -27,12 +28,15 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     private static final int REQUEST_ENABLE_BT = 42;
     private long startTime = 0;
     private long endTime = 0;
+    private BluetoothServer server;
+    private Thread ServerThr=new Thread(server);
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        ServerThr.start();
 
         FrameLayout debugFrame = (FrameLayout) findViewById(R.id.debugFrame);
         debugFrame.setOnClickListener(new DebugListener());
