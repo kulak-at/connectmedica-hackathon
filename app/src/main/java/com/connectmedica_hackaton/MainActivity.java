@@ -18,8 +18,6 @@ import com.connectmedica_hackaton.http.AbstractHttp;
 import com.connectmedica_hackaton.http.HttpMe;
 import com.connectmedica_hackaton.http.HttpPostPuff;
 import com.connectmedica_hackaton.model.User;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.util.Calendar;
@@ -31,7 +29,7 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     private Calendar startTime = null;
     private long endTime = 0;
     private BluetoothServer server;
-    private Thread ServerThr=new Thread(server);
+    private Thread ServerThr = new Thread(server);
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -39,39 +37,6 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ServerThr.start();
-
-        FrameLayout debugFrame = (FrameLayout) findViewById(R.id.debugFrame);
-        debugFrame.setOnClickListener(new DebugListener());
-        Button button = (Button) debugFrame.findViewById(R.id.debugButton);
-        final ImageView cigar = (ImageView)findViewById(R.id.ecigarrete);
-
-        button.setOnTouchListener(new View.OnTouchListener()
-        {
-            @Override
-            public boolean onTouch(View v, MotionEvent event)
-            {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    Calendar currentTime = Calendar.getInstance();
-                    startTime = currentTime;
-                    cigar.setImageDrawable(getResources().getDrawable(R.drawable.epapturned_on));
-                }
-                else if (event.getAction() == MotionEvent.ACTION_UP)
-                {
-                    Calendar currentTime = Calendar.getInstance();
-                    endTime = currentTime.getTimeInMillis();
-
-                    long diff = endTime - startTime.getTimeInMillis();
-                    Toast.makeText(MainActivity.this, diff + "", Toast.LENGTH_LONG).show();
-                    cigar.setImageDrawable(getResources().getDrawable(R.drawable.epapturned_off));
-
-                    sendPuff(diff, startTime);
-                }
-
-                return false;
-            }
-        });
-
-        getData();
     }
 
     private void sendPuff(long  duration, Calendar startTime) {
@@ -118,11 +83,17 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
 
-            if (!adapter.isEnabled())
-            {
-                Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
-            }
+        if (!adapter.isEnabled())
+        {
+            Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
+        }
+    }
+
+    public void startDebugActivity(View button)
+    {
+        Intent startIntent = new Intent(this, DebugPuffActivity.class);
+        startActivity(startIntent);
     }
 
     @Override
@@ -130,10 +101,10 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     {
         super.onActivityResult(requestCode, resultCode, data);
 
-            if (resultCode == RESULT_OK && requestCode == REQUEST_ENABLE_BT)
-            {
-                Toast.makeText(this, "Bluetooth enabled.", Toast.LENGTH_SHORT).show();
-            }
+        if (resultCode == RESULT_OK && requestCode == REQUEST_ENABLE_BT)
+        {
+            Toast.makeText(this, "Bluetooth enabled.", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Override

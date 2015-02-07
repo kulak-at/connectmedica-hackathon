@@ -1,70 +1,31 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                xmlns:tools="http://schemas.android.com/tools"
-                android:layout_width="fill_parent"
-                android:layout_height="fill_parent"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
     tools:context=".MainActivity"
-                android:orientation="vertical">
+    android:orientation="vertical">
 
-    <ImageView
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:id="@+id/ecigarrete"
-        android:cropToPadding="false"
-        android:scaleType="centerCrop"
-        android:src="@drawable/epapturned_off"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true" />
+    <Button
+        android:id="@+id/hiddenButton"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        style="@style/HiddenButton"
+        android:onClick="startDebugActivity"/>
 
-    <FrameLayout
-        android:layout_width="fill_parent"
-        android:layout_height="fill_parent"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true">
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="#FFFFFF"
+        android:layout_weight="8"/>
 
-        <LinearLayout
-            android:orientation="vertical"
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent">
-
-            <FrameLayout
-                android:id="@+id/debugFrame"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="7"
-                android:layout_margin="0dp"
-                android:padding="0dp">
-
-                <TextView
-                    android:id="@+id/debugTextView"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:textAppearance="@android:style/TextAppearance.DeviceDefault.Medium"
-                    android:gravity="center"
-                    android:visibility="gone"/>
-
-                <Button
-                    android:id="@+id/debugButton"
-                    android:text="@string/press_me"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="gone"/>
-
-            </FrameLayout>
-
-            <Button
-                android:text="@string/start_bluetooth_text"
-                android:id="@+id/btnStartBluetooth"
-                android:layout_height="0dp"
-                android:layout_width="match_parent"
-                android:layout_weight="1"
-                android:onClick="startBluetooth"/>
-        </LinearLayout>
-
-    </FrameLayout>
+    <Button
+        android:text="@string/start_bluetooth_text"
+        android:id="@+id/btnStartBluetooth"
+        android:layout_height="0dp"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        android:onClick="startBluetooth"/>
 
 
-</RelativeLayout>
+</LinearLayout>

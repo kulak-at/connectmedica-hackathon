@@ -5,4 +5,12 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="HiddenButton">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:background">#FFFFFF</item>
+        <item name="android:padding">0dp</item>
+        <item name="android:layout_margin">0dp</item>
+        <item name="android:clickable">true</item>
+    </style>
+
 </resources>
