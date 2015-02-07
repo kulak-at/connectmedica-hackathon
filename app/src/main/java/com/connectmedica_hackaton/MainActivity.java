@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Gravity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
@@ -32,6 +33,8 @@ import com.connectmedica_hackaton.model.User;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.util.Calendar;
 import java.util.UUID;
@@ -107,7 +110,59 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
 
     private void manageBTConnection(BluetoothSocket socket)
     {
-        
+        final BluetoothSocket connectionSocket = socket;
+        InputStream inputStream = null;
+        OutputStream outputStream = null;
+
+        // Get the input and output streams, using temp objects because
+        // member streams are final
+        try
+        {
+            inputStream = connectionSocket.getInputStream();
+            outputStream = connectionSocket.getOutputStream();
+        }
+        catch (IOException e)
+        {
+            e.printStackTrace();
+        }
+
+        final InputStream input = inputStream;
+        final OutputStream output = outputStream;
+
+        Thread workerThread = new Thread() {
+
+            @Override
+            public void run()
+            {
+                byte[] buffer = new byte[1024];  // buffer store for the stream
+                int bytes; // bytes returned from read()
+
+                // Keep listening to the InputStream until an exception occurs
+                while (true)
+                {
+                    try
+                    {
+                        // Read from the InputStream
+                        bytes = input.read(buffer);
+                        // Send the obtained bytes to the UI activity
+                        Log.d("mazurek", bytes + "");
+//                        mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
+//                                .sendToTarget();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        break;
+                    }
+                }
+
+                try
+                {
+                    connectionSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
     }
     private TextSwitcher textCount;
     private TextSwitcher textTime;
