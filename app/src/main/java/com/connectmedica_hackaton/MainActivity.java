@@ -4,14 +4,13 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.connectmedica_hackaton.http.AbstractHttp;
@@ -38,16 +37,17 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
         FrameLayout debugFrame = (FrameLayout) findViewById(R.id.debugFrame);
         debugFrame.setOnClickListener(new DebugListener());
         Button button = (Button) debugFrame.findViewById(R.id.debugButton);
+        final ImageView cigar = (ImageView)findViewById(R.id.ecigarrete);
 
         button.setOnTouchListener(new View.OnTouchListener()
         {
             @Override
             public boolean onTouch(View v, MotionEvent event)
             {
-                if (event.getAction() == MotionEvent.ACTION_DOWN)
-                {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     Calendar currentTime = Calendar.getInstance();
                     startTime = currentTime.getTimeInMillis();
+                    cigar.setImageDrawable(getResources().getDrawable(R.drawable.epapturned_on));
                 }
                 else if (event.getAction() == MotionEvent.ACTION_UP)
                 {
@@ -56,6 +56,7 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
 
                     long diff = endTime - startTime;
                     Toast.makeText(MainActivity.this, diff + "", Toast.LENGTH_LONG).show();
+                    cigar.setImageDrawable(getResources().getDrawable(R.drawable.epapturned_off));
                 }
 
                 return false;
@@ -82,7 +83,6 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     public void onError(String message)
     {
         Toast.makeText(this, "Error", Toast.LENGTH_LONG).show();
-        Log.e("mazurek", message);
     }
 
     public void startBluetooth(View button)
