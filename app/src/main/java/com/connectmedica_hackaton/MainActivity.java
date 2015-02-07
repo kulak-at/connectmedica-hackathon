@@ -21,6 +21,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -165,6 +166,10 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     }
     private TextSwitcher textCount;
     private TextSwitcher textTime;
+    private TextSwitcher cigaretsEquivalentText;
+    private TextSwitcher nicotineAmountText;
+    private TextView totalText;
+    private LinearLayout linLay;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
@@ -174,6 +179,10 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
 
         textCount = (TextSwitcher)findViewById(R.id.click_count);
         textTime  = (TextSwitcher)findViewById(R.id.seconds_count);
+        nicotineAmountText  = (TextSwitcher)findViewById(R.id.nicotine_amount);
+        cigaretsEquivalentText  = (TextSwitcher)findViewById(R.id.cigarets_equivalent);
+
+        totalText = (TextView)findViewById(R.id.total_text);
 
         ViewSwitcher.ViewFactory tFactory = new ViewSwitcher.ViewFactory() {
             @Override
@@ -187,6 +196,8 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
 
         textCount.setFactory(tFactory);
         textTime.setFactory(tFactory);
+        nicotineAmountText.setFactory(tFactory);
+        cigaretsEquivalentText.setFactory(tFactory);
 
         Animation animIn = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
         Animation animOut = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
@@ -240,6 +251,29 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
         }
     }
 
+    int totalCigarets = 0;
+    int IN_ROW = 5;
+    LinearLayout activeLinLay;
+    private void addNewCigaret() {
+        if(totalCigarets % IN_ROW == 0) {
+            activeLinLay = new LinearLayout(getApplicationContext());
+            activeLinLay.setOrientation(LinearLayout.VERTICAL);
+            LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
+            params.weight = 1.0f;
+            params.gravity = Gravity.TOP;
+            linLay.setLayoutParams(params);
+            linLay.addView(activeLinLay);
+        }
+        ImageView iv = new ImageView(getApplicationContext());
+        iv.setImageDrawable(getResources().getDrawable(R.drawable.cig));
+        LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.FILL_PARENT, LinearLayout.LayoutParams.FILL_PARENT);
+        params.weight = 1.0f;
+        params.gravity = Gravity.TOP;
+        iv.setLayoutParams(params);
+        activeLinLay.addView(iv);
+        totalCigarets++;
+    }
+
     private void getData()
     {
         HttpGetStats stats = new HttpGetStats(getApplicationContext());
@@ -273,9 +307,28 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
         int clicks = data.optJSONObject("today").optInt("puffs");
         textCount.setText("" + clicks);
         double milliseconds = data.optJSONObject("today").optDouble("milliseconds");
-        double seconds = milliseconds / 1000;
+        int seconds = (int)(milliseconds / 1000);
         textTime.setText("" + seconds + " s");
         delayGetData();
+
+        int secondsTotal = (int)(data.optJSONObject("total").optDouble("milliseconds") / 1000);
+        int clicksTotal = data.optJSONObject("total").optInt("puffs");
+
+        totalText.setText(clicksTotal + " clicks, for " + secondsTotal + " seconds in total.");
+
+        int cigaretsEquivalent = (int)data.optJSONObject("today").optDouble("cigaretsEquivalent");
+        int totalMgOfNicotine = (int)data.optJSONObject("today").optDouble("totalMgOfNicotine");
+        int tarrySubstanceInEquivalent = (int)data.optJSONObject("today").optDouble("tarrySubstanceInEquivalent");
+
+        nicotineAmountText.setText(totalMgOfNicotine + " mg");
+        cigaretsEquivalentText.setText(cigaretsEquivalent+ "");
+
+
+//
+//        while(totalCigarets < cigaretsEquivalent) {
+//            addNewCigaret();
+//        }
+
     }
 
     @Override
