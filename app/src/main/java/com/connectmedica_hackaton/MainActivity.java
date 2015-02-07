@@ -10,16 +10,21 @@ import android.os.Handler;
 import android.os.ParcelUuid;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextSwitcher;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.widget.ViewSwitcher;
 
 import com.connectmedica_hackaton.bluetoothConnection.BluetoothServer;
 import com.connectmedica_hackaton.http.AbstractHttp;
@@ -158,13 +163,41 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
 
         workerThread.start();
     }
+    private TextSwitcher textCount;
+    private TextSwitcher textTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-//        ServerThr.start();
+
+        textCount = (TextSwitcher)findViewById(R.id.click_count);
+        textTime  = (TextSwitcher)findViewById(R.id.seconds_count);
+
+        ViewSwitcher.ViewFactory tFactory = new ViewSwitcher.ViewFactory() {
+            @Override
+            public View makeView() {
+                TextView t = new TextView(MainActivity.this);
+                t.setGravity(Gravity.CENTER);
+                t.setTextSize(60);
+                return t;
+            }
+        };
+
+        textCount.setFactory(tFactory);
+        textTime.setFactory(tFactory);
+
+        Animation animIn = AnimationUtils.loadAnimation(this, android.R.anim.fade_in);
+        Animation animOut = AnimationUtils.loadAnimation(this, android.R.anim.fade_out);
+
+        textCount.setInAnimation(animIn);
+        textCount.setOutAnimation(animOut);
+
+        textTime.setInAnimation(animIn);
+        textTime.setOutAnimation(animOut);
+
+        //        ServerThr.start();
 //        getData();
 
 //        BTServerTask task = new BTServerTask();
@@ -173,13 +206,12 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
 
     protected void sendPuffData(String message)
     {
-        if (message.equals("wcislem przyciska"))
-        {
+
+        if (message.equals("wcislem przyciska")) {
             Calendar currentTime = Calendar.getInstance();
             startTime = currentTime.getTimeInMillis();
         }
-        else if (message.equals("wycislem przyciska"))
-        {
+        else if (message.equals("wycislem przyciska")) {
             Calendar currentTime = Calendar.getInstance();
             endTime = currentTime.getTimeInMillis();
 
@@ -192,6 +224,7 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
                 @Override
                 public void onResult(JSONObject data)
                 {
+
                     refreshView(data);
                 }
 
@@ -237,13 +270,11 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     }
 
     private void refreshView(JSONObject data) {
-        TextView click_counter = (TextView)findViewById(R.id.click_count);
-        TextView time_counter  = (TextView)findViewById(R.id.seconds_count);
         int clicks = data.optJSONObject("today").optInt("puffs");
-        click_counter.setText("" + clicks);
+        textCount.setText("" + clicks);
         double milliseconds = data.optJSONObject("today").optDouble("milliseconds");
         double seconds = milliseconds / 1000;
-        time_counter.setText("" + seconds + " s");
+        textTime.setText("" + seconds + " s");
         delayGetData();
     }
 
