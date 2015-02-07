@@ -1,7 +1,10 @@
 package com.connectmedica_hackaton;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothServerSocket;
+import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -20,7 +23,10 @@ import com.connectmedica_hackaton.http.HttpPostPuff;
 import com.connectmedica_hackaton.model.User;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.net.URL;
 import java.util.Calendar;
+import java.util.UUID;
 
 
 public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAjaxResult<JSONObject>
@@ -30,6 +36,71 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     private long endTime = 0;
     private BluetoothServer server;
     private Thread ServerThr = new Thread(server);
+
+    private class BTServerTask extends AsyncTask<Void, Void, BluetoothSocket>
+    {
+        private BluetoothServerSocket mmServerSocket;
+        private UUID MY_UUID = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
+        private static final String NAME = "server";
+
+        protected BluetoothSocket doInBackground(Void... urls)
+        {
+            BluetoothServerSocket tmp = null;
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+            try
+            {
+                tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
+            }
+            catch (IOException e)
+            {
+                e.printStackTrace();
+            }
+
+            mmServerSocket = tmp;
+            BluetoothSocket socket = null;
+
+            // Keep listening until exception occurs or a socket is returned
+            while (true)
+            {
+                try
+                {
+                    socket = mmServerSocket.accept();
+                }
+                catch (IOException e)
+                {
+                    e.printStackTrace();
+                    break;
+                }
+                // If a connection was accepted
+                if (socket != null)
+                {
+                    try
+                    {
+                        mmServerSocket.close();
+                    }
+                    catch (IOException exc)
+                    {
+                        exc.printStackTrace();
+                    }
+
+                    return socket;
+                }
+            }
+
+            return socket;
+        }
+
+        protected void onPostExecute(BluetoothSocket result)
+        {
+            manageBTConnection(result);
+        }
+    }
+
+    private void manageBTConnection(BluetoothSocket socket)
+    {
+        
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState)
