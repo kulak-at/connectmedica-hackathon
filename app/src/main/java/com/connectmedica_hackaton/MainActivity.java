@@ -214,8 +214,10 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
         cigaretsEquivalentText.setInAnimation(animIn);
         cigaretsEquivalentText.setOutAnimation(animOut);
 
-//        BTServerTask task = new BTServerTask();
-//        task.execute();
+        getData();
+
+        BTServerTask task = new BTServerTask();
+        task.execute();
     }
 
     protected void sendPuffData(String message)
@@ -295,14 +297,15 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     }
 
     private void delayGetData() {
-        new Handler().postDelayed(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        getData();
-                    }
-                }
-        , 1000);
+        return;
+//        new Handler().postDelayed(
+//                new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        getData();
+//                    }
+//                }
+//        , 1000);
 
     }
 
@@ -317,7 +320,7 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
         int secondsTotal = (int)(data.optJSONObject("total").optDouble("milliseconds") / 1000);
         int clicksTotal = data.optJSONObject("total").optInt("puffs");
 
-        totalText.setText(clicksTotal + " clicks, for " + secondsTotal + " seconds in total.");
+        totalText.setText(clicksTotal + " kliknięć, " + secondsTotal + " sekund łącznie.");
 
         int cigaretsEquivalent = (int)data.optJSONObject("today").optDouble("cigaretsEquivalent");
         int totalMgOfNicotine = (int)data.optJSONObject("today").optDouble("totalMgOfNicotine");
