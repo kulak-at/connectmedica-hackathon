@@ -10,6 +10,11 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.connectmedica_hackaton.http.AbstractHttp;
+import com.connectmedica_hackaton.http.HttpPostPuff;
+
+import org.json.JSONObject;
+
 import java.util.Calendar;
 
 
@@ -47,7 +52,23 @@ public class DebugPuffActivity extends ActionBarActivity
                     endTime = currentTime.getTimeInMillis();
 
                     long diff = endTime - startTime;
-                    Toast.makeText(DebugPuffActivity.this, diff + "", Toast.LENGTH_LONG).show();
+                    Toast.makeText(DebugPuffActivity.this, diff + "", Toast.LENGTH_SHORT).show();
+
+                    HttpPostPuff puff = new HttpPostPuff(getApplicationContext(), startTime, diff);
+
+                    puff.onResult(new AbstractHttp.OnAjaxResult<JSONObject>() {
+                        @Override
+                        public void onResult(JSONObject data) {
+                            refreshData(data);
+                        }
+
+                        @Override
+                        public void onError(String message) {
+                            Toast.makeText(DebugPuffActivity.this, "Error: " + message, Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+                    puff.run();
 
                     return true;
                 }
@@ -55,6 +76,10 @@ public class DebugPuffActivity extends ActionBarActivity
                 return false;
             }
         });
+    }
+
+    private void refreshData(JSONObject data) {
+
     }
 
 
