@@ -1,13 +1,18 @@
 package com.connectmedica_hackaton.http;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.androidquery.callback.AjaxCallback;
 import com.connectmedica_hackaton.model.Puff;
 
-public class HttpPostPuff extends AbstractHttp<Puff>
+import org.json.JSONObject;
+
+import java.util.Calendar;
+
+public class HttpPostPuff extends AbstractHttp<JSONObject>
 {
-    public HttpPostPuff(Context context, long startTime, long duration)
+    public HttpPostPuff(Context context, Calendar startTime, long duration)
     {
         super(context);
 
@@ -15,14 +20,17 @@ public class HttpPostPuff extends AbstractHttp<Puff>
         this.urlSuffix = "puff";
         this.requireAuth = true;
 
-        param("startTime", startTime);
+        Log.i("kulak", startTime.getTimeInMillis() + "");
+        Log.i("kulak", duration + "");
+
+        param("startTime", startTime.getTimeInMillis());
         param("duration", duration);
     }
 
     @Override
-    protected void call(AjaxCallback<Puff> callback)
+    protected void call(AjaxCallback<JSONObject> callback)
     {
         long expire = -1;
-        mAq.ajax(prepareUrl(), Puff.class, expire, callback);
+        mAq.ajax(prepareUrl(), JSONObject.class, expire, callback);
     }
 }

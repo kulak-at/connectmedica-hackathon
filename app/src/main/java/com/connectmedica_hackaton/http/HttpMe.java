@@ -6,8 +6,9 @@ import com.androidquery.callback.AjaxCallback;
 import com.connectmedica_hackaton.model.User;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
-public class HttpMe extends AbstractHttp<JSONArray>
+public class HttpMe extends AbstractHttp<JSONObject>
 {
     public HttpMe(Context context)
     {
@@ -18,9 +19,9 @@ public class HttpMe extends AbstractHttp<JSONArray>
     }
 
     @Override
-    protected void call(AjaxCallback<JSONArray> callback)
+    protected void call(AjaxCallback<JSONObject> callback)
     {
         long expire = -1;
-        mAq.ajax(prepareUrl(), JSONArray.class, expire, callback);
+        mAq.ajax(prepareUrl(), JSONObject.class, expire, callback);
     }
 }

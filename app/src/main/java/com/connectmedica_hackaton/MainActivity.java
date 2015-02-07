@@ -16,17 +16,19 @@ import android.widget.Toast;
 import com.connectmedica_hackaton.bluetoothConnection.BluetoothServer;
 import com.connectmedica_hackaton.http.AbstractHttp;
 import com.connectmedica_hackaton.http.HttpMe;
+import com.connectmedica_hackaton.http.HttpPostPuff;
 import com.connectmedica_hackaton.model.User;
 
 import org.json.JSONArray;
+import org.json.JSONObject;
 
 import java.util.Calendar;
 
 
-public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAjaxResult<JSONArray>
+public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAjaxResult<JSONObject>
 {
     private static final int REQUEST_ENABLE_BT = 42;
-    private long startTime = 0;
+    private Calendar startTime = null;
     private long endTime = 0;
     private BluetoothServer server;
     private Thread ServerThr=new Thread(server);
@@ -50,7 +52,7 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
             {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     Calendar currentTime = Calendar.getInstance();
-                    startTime = currentTime.getTimeInMillis();
+                    startTime = currentTime;
                     cigar.setImageDrawable(getResources().getDrawable(R.drawable.epapturned_on));
                 }
                 else if (event.getAction() == MotionEvent.ACTION_UP)
@@ -58,9 +60,11 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
                     Calendar currentTime = Calendar.getInstance();
                     endTime = currentTime.getTimeInMillis();
 
-                    long diff = endTime - startTime;
+                    long diff = endTime - startTime.getTimeInMillis();
                     Toast.makeText(MainActivity.this, diff + "", Toast.LENGTH_LONG).show();
                     cigar.setImageDrawable(getResources().getDrawable(R.drawable.epapturned_off));
+
+                    sendPuff(diff, startTime);
                 }
 
                 return false;
@@ -68,6 +72,27 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
         });
 
         getData();
+    }
+
+    private void sendPuff(long  duration, Calendar startTime) {
+        HttpPostPuff puff = new HttpPostPuff(getApplicationContext(), startTime, duration);
+        puff.onResult(new AbstractHttp.OnAjaxResult<JSONObject>() {
+            @Override
+            public void onResult(JSONObject data) {
+                updatePageData(data);
+            }
+
+            @Override
+            public void onError(String message) {
+
+            }
+        });
+
+        puff.run();
+    }
+
+    private void updatePageData(JSONObject data) {
+
     }
 
     private void getData()
@@ -78,7 +103,7 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     }
 
     @Override
-    public void onResult(JSONArray data)
+    public void onResult(JSONObject data)
     {
         Toast.makeText(this, data.toString(), Toast.LENGTH_LONG).show();
     }

@@ -24,6 +24,7 @@ public abstract class AbstractHttp<Type>
         @Override
         public <T> T transform(String url, Class<T> type, String encoding, byte[] data, AjaxStatus status)
         {
+            Log.i("kulak", new String(data));
             Gson g = new Gson();
             return g.fromJson(new String(data), type);
         }
@@ -69,6 +70,7 @@ public abstract class AbstractHttp<Type>
         callback.transformer(transformer);
 
 
+        Log.i("kulak", mValues.toString());
         if(requestMethod != Method.GET && requestMethod != Method.DELETE) {
             callback.params(mValues);
         }
@@ -80,6 +82,7 @@ public abstract class AbstractHttp<Type>
     abstract protected void call(AjaxCallback<Type> callback);
 
     private void callback(String url, Type data, AjaxStatus status) {
+        Log.i("status", status.getCode() + "");
         switch (status.getCode()) {
             case 200:
                 if(mOnResult != null) {
@@ -124,8 +127,8 @@ public abstract class AbstractHttp<Type>
     {
         String url = App.getBaseUrl() + App.getApiVersion() + urlSuffix;
 
-            if (requestMethod != Method.GET && requestMethod != Method.DELETE)
-                return url;
+//            if (requestMethod != Method.GET && requestMethod != Method.DELETE)
+//                return url;
 
         String ret = url + "?";
         String separator = "";
