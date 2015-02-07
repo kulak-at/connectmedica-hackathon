@@ -10,18 +10,15 @@ import org.json.JSONObject;
 
 import java.util.Calendar;
 
-public class HttpPostPuff extends AbstractHttp<JSONObject>
+public class HttpGetStats extends AbstractHttp<JSONObject>
 {
-    public HttpPostPuff(Context context, long startTime, long duration)
+    public HttpGetStats(Context context)
     {
         super(context);
 
-        this.requestMethod = Method.POST;
-        this.urlSuffix = "puff";
+        this.requestMethod = Method.GET;
+        this.urlSuffix = "me/stats";
         this.requireAuth = true;
-
-        param("startTime", startTime);
-        param("duration", duration);
     }
 
     @Override

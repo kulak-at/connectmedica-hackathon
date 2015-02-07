@@ -5,6 +5,7 @@ import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.AsyncTask;
+import android.os.Handler;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -14,10 +15,12 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.connectmedica_hackaton.bluetoothConnection.BluetoothServer;
 import com.connectmedica_hackaton.http.AbstractHttp;
+import com.connectmedica_hackaton.http.HttpGetStats;
 import com.connectmedica_hackaton.http.HttpMe;
 import com.connectmedica_hackaton.http.HttpPostPuff;
 import com.connectmedica_hackaton.model.User;
@@ -108,34 +111,47 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ServerThr.start();
-    }
-
-    private void sendPuff(long  duration, Calendar startTime) {
-        HttpPostPuff puff = new HttpPostPuff(getApplicationContext(), startTime, duration);
-        puff.onResult(new AbstractHttp.OnAjaxResult<JSONObject>() {
-            @Override
-            public void onResult(JSONObject data) {
-                updatePageData(data);
-            }
-
-            @Override
-            public void onError(String message) {
-
-            }
-        });
-
-        puff.run();
-    }
-
-    private void updatePageData(JSONObject data) {
-
+        getData();
     }
 
     private void getData()
     {
-        HttpMe ajax = new HttpMe(getApplicationContext());
-        ajax.onResult(this);
-        ajax.run();
+        HttpGetStats stats = new HttpGetStats(getApplicationContext());
+        stats.onResult(new AbstractHttp.OnAjaxResult<JSONObject>() {
+            @Override
+            public void onResult(JSONObject data) {
+                refreshView(data);
+            }
+
+            @Override
+            public void onError(String message) {
+                delayGetData();
+            }
+        });
+        stats.run();
+    }
+
+    private void delayGetData() {
+        new Handler().postDelayed(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        getData();
+                    }
+                }
+        , 1000);
+
+    }
+
+    private void refreshView(JSONObject data) {
+        TextView click_counter = (TextView)findViewById(R.id.click_count);
+        TextView time_counter  = (TextView)findViewById(R.id.seconds_count);
+        int clicks = data.optJSONObject("today").optInt("puffs");
+        click_counter.setText("" + clicks);
+        double milliseconds = data.optJSONObject("today").optDouble("milliseconds");
+        double seconds = milliseconds / 1000;
+        time_counter.setText("" + seconds + " s");
+        delayGetData();
     }
 
     @Override
