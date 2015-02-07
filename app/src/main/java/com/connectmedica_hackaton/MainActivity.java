@@ -45,6 +45,7 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     private BluetoothServer server;
     private Thread ServerThr = new Thread(server);
 
+<<<<<<< Updated upstream
     private class BTServerTask extends AsyncTask<Void, Void, BluetoothSocket>
     {
         private BluetoothServerSocket mmServerSocket;
@@ -112,6 +113,12 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     private TextSwitcher textCount;
     private TextSwitcher textTime;
 
+=======
+    private TextSwitcher textCount;
+    private TextSwitcher textTime;
+
+
+>>>>>>> Stashed changes
     @Override
     protected void onCreate(Bundle savedInstanceState)
     {
