@@ -1,11 +1,13 @@
 package com.connectmedica_hackaton;
 
 import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Handler;
+import android.os.ParcelUuid;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,18 +29,22 @@ import com.connectmedica_hackaton.http.HttpPostPuff;
 import com.connectmedica_hackaton.model.User;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.StringReader;
 import java.net.URL;
 import java.util.Calendar;
+import java.util.Set;
 import java.util.UUID;
 
 
 public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAjaxResult<JSONObject>
 {
     private static final int REQUEST_ENABLE_BT = 42;
-    private Calendar startTime = null;
+    private long startTime = 0;
     private long endTime = 0;
     private BluetoothServer server;
     private Thread ServerThr = new Thread(server);
@@ -46,55 +52,44 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     private class BTServerTask extends AsyncTask<Void, Void, BluetoothSocket>
     {
         private BluetoothServerSocket mmServerSocket;
-        private UUID MY_UUID = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
+        private UUID MY_UUID = UUID.fromString("0000110a-0000-1000-8000-00805f9b34fb");
+        private static final String ADDRESS = "00:12:6F:26:7A:47";
+        // fa87c0d0-afac-11de-8a39-0800200c9a66
         private static final String NAME = "server";
+        private BluetoothDevice ourDevice = null;
 
         protected BluetoothSocket doInBackground(Void... urls)
         {
+
             BluetoothServerSocket tmp = null;
             BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
 
-            try
-            {
-                tmp = mBluetoothAdapter.listenUsingRfcommWithServiceRecord(NAME, MY_UUID);
-            }
-            catch (IOException e)
-            {
-                e.printStackTrace();
-            }
+            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
 
-            mmServerSocket = tmp;
-            BluetoothSocket socket = null;
+            if (pairedDevices.size() > 0) {
+                // Loop through paired devices
+                for (BluetoothDevice device : pairedDevices) {
+                    if (device.getAddress().equals(ADDRESS))
+                        ourDevice = device;
+                }
 
-            // Keep listening until exception occurs or a socket is returned
-            while (true)
-            {
-                try
-                {
-                    socket = mmServerSocket.accept();
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                    break;
-                }
-                // If a connection was accepted
-                if (socket != null)
-                {
-                    try
-                    {
-                        mmServerSocket.close();
-                    }
-                    catch (IOException exc)
-                    {
-                        exc.printStackTrace();
-                    }
+
+                mmServerSocket = tmp;
+                BluetoothSocket socket = null;
+
+                try {
+                    socket = ourDevice.createRfcommSocketToServiceRecord(ourDevice.getUuids()[0].getUuid());
+                    socket.connect();
 
                     return socket;
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
+
+                return socket;
             }
 
-            return socket;
+            return null;
         }
 
         protected void onPostExecute(BluetoothSocket result)
@@ -114,7 +109,6 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
         try
         {
             inputStream = connectionSocket.getInputStream();
-            outputStream = connectionSocket.getOutputStream();
         }
         catch (IOException e)
         {
@@ -122,7 +116,6 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
         }
 
         final InputStream input = inputStream;
-        final OutputStream output = outputStream;
 
         Thread workerThread = new Thread() {
 
@@ -131,18 +124,22 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
             {
                 byte[] buffer = new byte[1024];  // buffer store for the stream
                 int bytes; // bytes returned from read()
+                BufferedReader r = new BufferedReader(new InputStreamReader(input));
+                String line;
 
                 // Keep listening to the InputStream until an exception occurs
                 while (true)
                 {
                     try
                     {
-                        // Read from the InputStream
-                        bytes = input.read(buffer);
+                        line = r.readLine();
+
+//                        bytes = input.read(buffer);
+
                         // Send the obtained bytes to the UI activity
-                        Log.d("mazurek", bytes + "");
-//                        mHandler.obtainMessage(MESSAGE_READ, bytes, -1, buffer)
-//                                .sendToTarget();
+                        Log.d("mazurek", line);
+                        sendPuffData(line);
+
                     } catch (IOException e) {
                         e.printStackTrace();
                         break;
@@ -152,12 +149,14 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
                 try
                 {
                     connectionSocket.close();
+                    r.close();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
         };
 
+        workerThread.start();
     }
 
     @Override
@@ -165,8 +164,47 @@ public class MainActivity extends ActionBarActivity implements AbstractHttp.OnAj
     {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        ServerThr.start();
-        getData();
+//        ServerThr.start();
+//        getData();
+
+//        BTServerTask task = new BTServerTask();
+//        task.execute();
+    }
+
+    protected void sendPuffData(String message)
+    {
+        if (message.equals("wcislem przyciska"))
+        {
+            Calendar currentTime = Calendar.getInstance();
+            startTime = currentTime.getTimeInMillis();
+        }
+        else if (message.equals("wycislem przyciska"))
+        {
+            Calendar currentTime = Calendar.getInstance();
+            endTime = currentTime.getTimeInMillis();
+
+            long diff = endTime - startTime;
+
+            HttpPostPuff puff = new HttpPostPuff(this, startTime, diff);
+
+            puff.onResult(new AbstractHttp.OnAjaxResult<JSONObject>()
+            {
+                @Override
+                public void onResult(JSONObject data)
+                {
+                    refreshView(data);
+                }
+
+                @Override
+                public void onError(String message)
+                {
+
+                    Log.e("mazurek", message);
+                }
+            });
+
+            puff.run();
+        }
     }
 
     private void getData()
